@@ -50,7 +50,6 @@ MainWindow::MainWindow(QWidget *parent)
 MdiChild *MainWindow::createMdiChild()
 {
     MdiChild *child = new MdiChild;
-
     mdiArea->addSubWindow(child);
 
     return child;
@@ -61,6 +60,7 @@ void MainWindow::newFile()
     MdiChild *child = createMdiChild();
     child->newFile();
     child->show();
+
 }
 
 MainWindow::~MainWindow()
