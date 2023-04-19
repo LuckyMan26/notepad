@@ -3,8 +3,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
-
+#include <QPushButton>
+#include <QToolBar>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,6 +20,14 @@ public:
     ~MainWindow();
 
 private:
+    QToolBar* editToolBar ;
+    QStatusBar* statusBar;
+    QPushButton* btnSave;
+    QPushButton* btnAdd;
+    QPushButton* btnRedo;
+    QPushButton* btnUndo;
+
+
     Ui::MainWindow *ui;
 };
 
