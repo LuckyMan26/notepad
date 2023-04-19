@@ -2,6 +2,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "mdichild.h"
+#include "qmdiarea.h"
 #include <QMainWindow>
 #include <QPushButton>
 #include <QToolBar>
@@ -18,8 +20,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+    MdiChild *createMdiChild();
+    void newFile();
+private slots:
+    void createFile();
 private:
+    QMdiArea *mdiArea;
     QToolBar* editToolBar ;
     QStatusBar* statusBar;
     QPushButton* btnSave;
