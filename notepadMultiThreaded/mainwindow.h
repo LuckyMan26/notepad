@@ -21,9 +21,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     MdiChild *createMdiChild();
-    void newFile();
+
 private slots:
-    void createFile();
+    void newFile();
 private:
     QMdiArea *mdiArea;
     QToolBar* editToolBar ;

@@ -4,12 +4,13 @@
 #include "mdichild.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    : mdiArea(new QMdiArea),
+    ui(new Ui::MainWindow)
+
 
 {
     std::cout<<"Hello\n";
-    mdiArea = new QMdiArea();
+    ui->setupUi(this);
     mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setCentralWidget(mdiArea);
@@ -35,33 +36,33 @@ MainWindow::MainWindow(QWidget *parent)
     editToolBar->addWidget(btnRedo);
     editToolBar->addWidget(btnUndo);
     std::cout<<"Hello\n";
-    newFile(); //starts with a new document open
+
+
+    std::cout<<"Hello\n";
+
+    newFile();
     mdiArea->setViewMode(QMdiArea::TabbedView);
     mdiArea->setTabsClosable(true);
     mdiArea->setTabsMovable(true);
-    std::cout<<"Hello\n";
-    setAcceptDrops(true); //dragndrop on window
-    ui->setupUi(this);
+
 
 }
 MdiChild *MainWindow::createMdiChild()
 {
-    MdiChild *child = new MdiChild();
+    MdiChild *child = new MdiChild;
+
     mdiArea->addSubWindow(child);
 
     return child;
 }
 void MainWindow::newFile()
 {
+
     MdiChild *child = createMdiChild();
     child->newFile();
     child->show();
 }
-void MainWindow::createFile(){
-    MdiChild *child = createMdiChild();
-    child->newFile();
-    child->show();
-}
+
 MainWindow::~MainWindow()
 {
     delete ui;
