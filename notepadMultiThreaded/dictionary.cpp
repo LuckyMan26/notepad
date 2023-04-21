@@ -3,6 +3,7 @@
 #include <fstream>
 #include <QFile>
 #include <QTextStream>
+Dictionary* Dictionary::dictionary_= nullptr;
 std::vector<std::string> removeDupWord(std::string str,long long& numOfWords)
 {
     std::vector<std::string> res;
@@ -30,6 +31,7 @@ Dictionary::Dictionary()
     std::string str;
     while(!in.atEnd()) {
         QString line = in.readLine();
+        line = line.toLower();
         str = line.toStdString();
 
         words = removeDupWord(str,numOfWords);
@@ -50,20 +52,18 @@ Dictionary::Dictionary()
     file.close();
 }
 double Dictionary::getProbability(std::string word){
-    std::cout<<numOfWords<<std::endl;
     return (double(hash[word]) / double(numOfWords));
 }
 Dictionary *Dictionary::GetInstance()
 {
-
     if(dictionary_==nullptr){
         dictionary_ = new Dictionary();
     }
     return dictionary_;
 }
 bool Dictionary::checkWordInDictionary(std::string word){
-    return (hash.contains(words[i])){
-        int temp = hash[words[i]];
-        hash[words[i]] = temp+1;
-    }
+    return (hash.contains(word));
+}
+int Dictionary::getNumOfWords(){
+    return numOfWords;
 }

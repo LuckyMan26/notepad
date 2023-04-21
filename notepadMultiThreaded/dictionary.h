@@ -11,16 +11,15 @@ class Dictionary
     std::string file_name;
 protected:
     static Dictionary* dictionary_;
-public:
     Dictionary();
+public:
     double getProbability(std::string word);
-
     Dictionary(Dictionary &other) = delete;
 
     void operator=(const Dictionary &) = delete;
     static Dictionary *GetInstance();
     bool checkWordInDictionary(std::string word);
-
+    int getNumOfWords();
 };
 
 #endif // DICTIONARY_H

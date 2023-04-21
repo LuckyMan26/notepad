@@ -3,14 +3,17 @@
 #include "dictionary.h"
 #include <QApplication>
 #include <iostream>
-
+#include "word.h"
 
 int main(int argc, char *argv[])
 {
-    std::cout<<"Hello" << std::endl;
-    Dictionary d;
-    double res = d.getProbability("the");
-    std::cout<<res<<std::endl;
+
+    std::string str="speling";
+
+    std::string correction;
+    Word w(str);
+    correction = w.spellTest();
+    std::cout<<correction<<std::endl;
    /* QApplication a(argc, argv);
     MainWindow w;
     w.show();
