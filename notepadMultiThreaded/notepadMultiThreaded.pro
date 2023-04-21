@@ -11,11 +11,13 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    mdichild.cpp
+    mdichild.cpp \
+    word.cpp
 
 HEADERS += \
     mainwindow.h \
-    mdichild.h
+    mdichild.h \
+    word.h
 
 FORMS += \
     mainwindow.ui
