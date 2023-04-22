@@ -1,6 +1,7 @@
 
 #include <QtWidgets>
 #include <iostream>
+#include "QtConcurrent/qtconcurrentrun.h"
 #include "mdichild.h"
 #include "dictionary.h"
 #include "word.h"
@@ -157,15 +158,19 @@ QString MdiChild::strippedName(const QString &fullFileName)
     return QFileInfo(fullFileName).fileName();
 }
 std::string MdiChild::checkLastWord(){
-    QString text = this->toPlainText();
-    int index = text.size()-1;
+
+    //QString text = this->toPlainText();
+    return "";
+    /*int index = text.size()-1;
     QString lastWord = text.mid((lastWordPos>0 ? lastWordPos+1:0),index-lastWordPos);
     QTextCharFormat underlineFormat;
     std::string correction;
     std::string lastWordStr = lastWord.toLower().toStdString();
     lastWordStr.erase(remove(lastWordStr.begin(), lastWordStr.end(), ' '), lastWordStr.end());
     Word w(lastWordStr);
-    correction = w.spellTest();
+    QFuture<std::string> future1 = QtConcurrent::run(&Word::spellTest,w);
+
+    correction = future1.result();
 
     if(lastWordStr==correction){
         return "";
@@ -187,6 +192,6 @@ std::string MdiChild::checkLastWord(){
     lastWordPos = index;
 
     return lastWord.toStdString();
-    }
+    }*/
 }
 

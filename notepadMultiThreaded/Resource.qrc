@@ -6,5 +6,16 @@
         <file>../images/undo.jpg</file>
         <file>../words.txt</file>
         <file>../big_text.txt</file>
+        <file>../images/document-close.svg</file>
+        <file>../images/document-edit.svg</file>
+        <file>../images/document-multiple.svg</file>
+        <file>../images/document-new.svg</file>
+        <file>../images/document-open.svg</file>
+        <file>../images/document-print.svg</file>
+        <file>../images/document-save.svg</file>
+        <file>../images/edit-cut.svg</file>
+        <file>../images/edit-paste.svg</file>
+        <file>../images/edit-redo.svg</file>
+        <file>../images/edit-undo.svg</file>
     </qresource>
 </RCC>
