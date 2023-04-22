@@ -7,13 +7,17 @@ Dictionary* Dictionary::dictionary_= nullptr;
 std::vector<std::string> removeDupWord(std::string str,long long& numOfWords)
 {
     std::vector<std::string> res;
-    std::istringstream iss(str);
-
+    size_t start = 0;
+    size_t end = str.find(' ');
     std::string word;
-    while (iss >> word) {
+    while (end != std::string::npos) {
         numOfWords++;
-        res.push_back(word);
+        res.push_back(str.substr(start, end - start));
+        start = end + 1;
+        end = str.find(' ', start);
     }
+
+    res.push_back(str.substr(start));
     return res;
 }
 Dictionary::Dictionary()

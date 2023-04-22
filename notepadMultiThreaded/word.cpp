@@ -1,12 +1,19 @@
 
 #include "word.h"
+#include <ctime>
 #include <set>
 #include <vector>
 #include <fstream>
 #include "dictionary.h"
+#include <time.h>
+#include <QThread>
+#include <QFuture>
+#include <QtConcurrent/QtConcurrent>
+#include <algorithm>
 Word::Word(std::string str)
 {
     word=str;
+
 }
 
 std::set<std::string> Word::editFirstOrder(std::string word_){
@@ -42,15 +49,60 @@ std::set<std::string> Word::editSecondOrder(std::string w){
     std::set<std::string> result;
     std::set<std::string> editsOfFirstOrder_ = editFirstOrder(w);
     for(auto it : editsOfFirstOrder_){
-        for(auto iterator : editFirstOrder(it)){
+        std::set<std::string> editFirstOrderSet = editFirstOrder(it);
+        for(auto iterator : editFirstOrderSet){
             result.insert(iterator);
         }
     }
     return result;
 }
+/*class WordThread : public QThread
+{
+    Q_OBJECT
+    std::string word;
+    std::set<std::string>& candidates;
+public:
+    explicit WordThread(std::set<std::string>& candidates_,std::string w):
+        word(w), candidates(candidates_){
+    }
+
+    void run() override {
+        Word w;
+        std::set<std::string> editFirstOrderSet = w.editFirstOrder(word);
+        for(auto it : editFirstOrderSet){
+            if(w.checkWordInDictionary(it)){
+                candidates.insert(it);
+            }
+        }
+        emit(resultReady(candidates));
+    }
+signals:
+    void resultReady(const std::set<std::string>& candidates);
+
+};*/
+extern std::set<std::string> possibleCandidatsOfFirstOrder(std::string w){
+    Word word;
+    std::set<std::string> candidates;
+    std::set<std::string> editSecondOrderSet = word.editSecondOrder(w);
+    for(auto it : editSecondOrderSet){
+        if(word.checkWordInDictionary(it)){
+            candidates.insert(it);
+        }
+    }
+    return candidates;
+}
+extern std::set<std::string> possibleCandidatsOfSecondOrder(std::string w){
+    Word word;
+    std::set<std::string> candidates;
+    std::set<std::string> editFirstOrderSet = word.editFirstOrder(w);
+    for(auto it : editFirstOrderSet){
+        if(word.checkWordInDictionary(it)){
+            candidates.insert(it);
+        }
+    }
+    return candidates;
+}
 bool Word::checkWordInDictionary(std::string w){
-    std::ifstream f;
-    std::string str;
     return Dictionary::GetInstance()->checkWordInDictionary(w);
 }
 void Word::setWord(std::string str){
@@ -61,13 +113,12 @@ std::string Word::getWord(){
 }
 double Word::errorModel(std::string w){
     double alpha=0.95;
-    std::set<std::string> candidates= possibleCandidates(w);
 
-    //std::cout<<candidates2.size()<<std::endl;
+    std::clock_t clock = std::clock();
+
     if(word==w){
         return alpha;
     }
-
     else if(checkWordInDictionary(w)){
         return double(1-alpha)/double((candidates.size()));
     }
@@ -75,36 +126,42 @@ double Word::errorModel(std::string w){
         return 0;
     }
 }
+void Word::handleResults(std::set<std::string>& s){
+
+}
 std::set<std::string> Word::possibleCandidates(std::string w){
-    std::set<std::string> candidates;
-    for(auto it : editFirstOrder(w)){
-        if(checkWordInDictionary(it)){
-            candidates.insert(it);
-        }
-    }
-    for(auto it : editSecondOrder(w)){
-        if(checkWordInDictionary(it)){
-            candidates.insert(it);
-        }
-    }
+    std::set<std::string> candidates1;
+    std::set<std::string> candidates2;
+    std::set<std::string> res;
+
+    QFuture<std::set<std::string>> future1 = QtConcurrent::run(possibleCandidatsOfFirstOrder, w);
+    QFuture<std::set<std::string>> future2 = QtConcurrent::run(possibleCandidatsOfSecondOrder, w);
+
+    candidates1 = future1.result();
+    candidates2 = future2.result();
+    std::merge(candidates1.begin(), candidates1.end(), candidates2.begin(), candidates2.end(), std::inserter(res, res.begin()));
     if(checkWordInDictionary(w)){
-        candidates.insert(w);
+        res.insert(w);
     }
-    return candidates;
+
+    return res;
 }
 std::string Word::spellTest(){
-    std::set<std::string> candidates = possibleCandidates(word);
+    candidates = possibleCandidates(word);
+    std::clock_t clock = std::clock();
     auto oneMove = *(candidates.begin());
     std::string res = oneMove;
     double maxProbability = (Dictionary::GetInstance()->getProbability(res)) * (errorModel(res));
+    clock = std::clock();
     for(auto it:candidates){
-        //std::cout<<it<<std::endl;
+
         double temp =  (Dictionary::GetInstance()->getProbability(it)) * errorModel(it);
         if(temp > maxProbability){
             res = it;
             maxProbability = temp;
         }
     }
+    std::cout<<std::clock() - clock << std::endl;
     std::cout<<maxProbability<<std::endl;
     return res;
 }

@@ -161,15 +161,22 @@ std::string MdiChild::checkLastWord(){
     int index = text.size()-1;
     QString lastWord = text.mid((lastWordPos>0 ? lastWordPos+1:0),index-lastWordPos);
     QTextCharFormat underlineFormat;
+    std::string correction;
+    std::string lastWordStr = lastWord.toLower().toStdString();
+    lastWordStr.erase(remove(lastWordStr.begin(), lastWordStr.end(), ' '), lastWordStr.end());
+    Word w(lastWordStr);
+    correction = w.spellTest();
+
+    if(lastWordStr==correction){
+        return "";
+    }
+    else{
     underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
 
-    // Get the text cursor
     QTextCursor cursor = textCursor();
 
-    // Move the cursor to the start position
     cursor.setPosition((lastWordPos>0 ? lastWordPos+1:0));
 
-    // Move the cursor to the end position without selecting the text
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, index - (lastWordPos>0 ? lastWordPos+1:0));
 
     cursor.mergeCharFormat(underlineFormat);
@@ -177,9 +184,9 @@ std::string MdiChild::checkLastWord(){
     setTextCursor(cursor);
     update();
 
-    //setTextCursor(cursor);
     lastWordPos = index;
 
     return lastWord.toStdString();
+    }
 }
 
