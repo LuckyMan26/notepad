@@ -58,7 +58,12 @@ void MainWindow::newFile()
 {
 
     MdiChild *child = createMdiChild();
+    QTextCharFormat underlineFormat;
+    underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+
+
     child->newFile();
+
     child->show();
 
 }

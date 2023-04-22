@@ -2,7 +2,8 @@
 #include <QtWidgets>
 #include <iostream>
 #include "mdichild.h"
-
+#include "dictionary.h"
+#include "word.h"
 MdiChild::MdiChild()
 {
     setAttribute(Qt::WA_DeleteOnClose);
@@ -12,7 +13,7 @@ MdiChild::MdiChild()
     setAcceptDrops(false);
     curPos=0;
     lastWordPos=0;
-    connect(this, &MdiChild::spacePressed, this, &MdiChild::getLastWord);
+    connect(this, &MdiChild::spacePressed, this, &MdiChild::checkLastWord);
 
 }
 void MdiChild::keyPressEvent(QKeyEvent *event) {
@@ -155,12 +156,30 @@ QString MdiChild::strippedName(const QString &fullFileName)
 {
     return QFileInfo(fullFileName).fileName();
 }
-std::string MdiChild::getLastWord(){
+std::string MdiChild::checkLastWord(){
     QString text = this->toPlainText();
     int index = text.size()-1;
     QString lastWord = text.mid((lastWordPos>0 ? lastWordPos+1:0),index-lastWordPos);
-    std::cout<<lastWord.toStdString()<<" Index: "<< lastWordPos <<std::endl;
+    QTextCharFormat underlineFormat;
+    underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+
+    // Get the text cursor
+    QTextCursor cursor = textCursor();
+
+    // Move the cursor to the start position
+    cursor.setPosition((lastWordPos>0 ? lastWordPos+1:0));
+
+    // Move the cursor to the end position without selecting the text
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, index - (lastWordPos>0 ? lastWordPos+1:0));
+
+    cursor.mergeCharFormat(underlineFormat);
+
+    setTextCursor(cursor);
+    update();
+
+    //setTextCursor(cursor);
     lastWordPos = index;
+
     return lastWord.toStdString();
 }
 

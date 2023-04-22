@@ -61,13 +61,15 @@ std::string Word::getWord(){
 }
 double Word::errorModel(std::string w){
     double alpha=0.95;
-    std::set<std::string> candidates = possibleCandidates(w);
+    std::set<std::string> candidates= possibleCandidates(w);
 
+    //std::cout<<candidates2.size()<<std::endl;
     if(word==w){
         return alpha;
     }
+
     else if(checkWordInDictionary(w)){
-        return double(1-alpha)/double(candidates.size());
+        return double(1-alpha)/double((candidates.size()));
     }
     else{
         return 0;
@@ -96,7 +98,7 @@ std::string Word::spellTest(){
     std::string res = oneMove;
     double maxProbability = (Dictionary::GetInstance()->getProbability(res)) * (errorModel(res));
     for(auto it:candidates){
-        std::cout<<it<<std::endl;
+        //std::cout<<it<<std::endl;
         double temp =  (Dictionary::GetInstance()->getProbability(it)) * errorModel(it);
         if(temp > maxProbability){
             res = it;

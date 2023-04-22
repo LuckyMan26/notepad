@@ -25,7 +25,7 @@ protected:
 
 private slots:
     void documentWasModified();
-    std::string getLastWord();
+    std::string checkLastWord();
 
 private:
     bool maybeSave();
