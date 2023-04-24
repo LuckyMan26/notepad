@@ -1,6 +1,7 @@
 
 #ifndef MDICHILD_H
 #define MDICHILD_H
+#include "checkspellingthread.h"
 #include <QTextEdit>
 
 class MdiChild : public QTextEdit
@@ -18,16 +19,23 @@ public:
     bool saveFile(const QString &fileName);
     QString userFriendlyCurrentFile();
     QString currentFile() { return curFile; }
+    void mousePressEvent(QMouseEvent * event) override;
+    void enterEvent(QMouseEvent *event);
 signals:
     void spacePressed();
+    void selectedWord(QString&);
+    void hoveredWord();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void documentWasModified();
-    std::string checkLastWord();
+    std::string checkSpellingOfTheWord();
+    void updateText();
 
 private:
+    CheckSpellingThread thread;
     bool maybeSave();
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);

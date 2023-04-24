@@ -7,6 +7,7 @@
 #include "word.h"
 MdiChild::MdiChild()
 {
+    //setMouseTracking(true);
     setAttribute(Qt::WA_DeleteOnClose);
     isUntitled = true;
     this->setFontPointSize(11);
@@ -14,14 +15,19 @@ MdiChild::MdiChild()
     setAcceptDrops(false);
     curPos=0;
     lastWordPos=0;
-    connect(this, &MdiChild::spacePressed, this, &MdiChild::checkLastWord);
+    connect(&thread, &CheckSpellingThread::checkSpell,
+            this, &MdiChild::updateText);
+    connect(this, &MdiChild::spacePressed, this, &MdiChild::checkSpellingOfTheWord);
+    connect(this,&MdiChild::selectedWord,this,&MdiChild::checkSpellingOfTheWord);
 
+}
+void MdiChild::updateText(){
+    update();
 }
 void MdiChild::keyPressEvent(QKeyEvent *event) {
     curPos++;
     QTextEdit::keyPressEvent(event);
     if (event->key() == Qt::Key_Space) {
-
         emit spacePressed();
     }
 
@@ -157,21 +163,22 @@ QString MdiChild::strippedName(const QString &fullFileName)
 {
     return QFileInfo(fullFileName).fileName();
 }
-std::string MdiChild::checkLastWord(){
+std::string MdiChild::checkSpellingOfTheWord(){
 
-    //QString text = this->toPlainText();
-    return "";
-    /*int index = text.size()-1;
+    std::cout<<"got here"<<std::endl;
+    QString text = this->toPlainText();
+
+    int index = text.size()-1;
     QString lastWord = text.mid((lastWordPos>0 ? lastWordPos+1:0),index-lastWordPos);
     QTextCharFormat underlineFormat;
     std::string correction;
     std::string lastWordStr = lastWord.toLower().toStdString();
     lastWordStr.erase(remove(lastWordStr.begin(), lastWordStr.end(), ' '), lastWordStr.end());
     Word w(lastWordStr);
-    QFuture<std::string> future1 = QtConcurrent::run(&Word::spellTest,w);
+    thread.setWord(w);
 
-    correction = future1.result();
-
+    correction = thread.checkSpell();
+    std::cout<<correction<<std::endl;
     if(lastWordStr==correction){
         return "";
     }
@@ -187,11 +194,22 @@ std::string MdiChild::checkLastWord(){
     cursor.mergeCharFormat(underlineFormat);
 
     setTextCursor(cursor);
-    update();
 
     lastWordPos = index;
 
     return lastWord.toStdString();
-    }*/
+    }
+}
+void MdiChild::mousePressEvent(QMouseEvent * event)
+{
+    QTextCursor tc = cursorForPosition ( event->pos());
+    tc.select(QTextCursor::LineUnderCursor);
+    QString strWord = tc.selectedText();
+
+    if(!strWord.isEmpty())
+    {
+
+       // emit selectedWord(strWord);
+    }
 }
 
