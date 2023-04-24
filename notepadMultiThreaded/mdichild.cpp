@@ -15,13 +15,16 @@ MdiChild::MdiChild()
     setAcceptDrops(false);
     curPos=0;
     lastWordPos=0;
-    connect(&thread, &CheckSpellingThread::checkSpell,
+    connect(&thread, &CheckSpellingThread::finishedComputing,
             this, &MdiChild::updateText);
     connect(this, &MdiChild::spacePressed, this, &MdiChild::checkSpellingOfTheWord);
-    connect(this,&MdiChild::selectedWord,this,&MdiChild::checkSpellingOfTheWord);
+    //connect(this,&MdiChild::selectedWord,this,&MdiChild::checkSpellingOfTheWord);
 
 }
-void MdiChild::updateText(){
+void MdiChild::updateText(QString correction){
+
+    //std::cout<<"Result: ";
+    this->setText("afdfads");
     update();
 }
 void MdiChild::keyPressEvent(QKeyEvent *event) {
@@ -176,14 +179,9 @@ std::string MdiChild::checkSpellingOfTheWord(){
     lastWordStr.erase(remove(lastWordStr.begin(), lastWordStr.end(), ' '), lastWordStr.end());
     Word w(lastWordStr);
     thread.setWord(w);
-
-    correction = thread.checkSpell();
-    std::cout<<correction<<std::endl;
-    if(lastWordStr==correction){
-        return "";
-    }
-    else{
-    underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+    thread.checkSpell();
+    //else{
+    /*underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
 
     QTextCursor cursor = textCursor();
 
@@ -195,10 +193,11 @@ std::string MdiChild::checkSpellingOfTheWord(){
 
     setTextCursor(cursor);
 
-    lastWordPos = index;
+    lastWordPos = index;*/
 
-    return lastWord.toStdString();
-    }
+    //return lastWord.toStdString();
+   // }
+    return "";
 }
 void MdiChild::mousePressEvent(QMouseEvent * event)
 {

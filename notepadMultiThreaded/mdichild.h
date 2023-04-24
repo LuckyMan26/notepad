@@ -32,7 +32,7 @@ protected:
 private slots:
     void documentWasModified();
     std::string checkSpellingOfTheWord();
-    void updateText();
+    void updateText(QString);
 
 private:
     CheckSpellingThread thread;
