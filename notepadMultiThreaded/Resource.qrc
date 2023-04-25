@@ -17,5 +17,6 @@
         <file>../images/edit-paste.svg</file>
         <file>../images/edit-redo.svg</file>
         <file>../images/edit-undo.svg</file>
+        <file>../images/correct-errors.svg</file>
     </qresource>
 </RCC>

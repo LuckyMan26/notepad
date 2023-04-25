@@ -4,9 +4,11 @@
 #include "mdichild.h"
 #include "dictionary.h"
 #include "word.h"
+#include <QToolTip>
+
 MdiChild::MdiChild()
 {
-    //setMouseTracking(true);
+    setMouseTracking(true);
     setAttribute(Qt::WA_DeleteOnClose);
     isUntitled = true;
     this->setFontPointSize(11);
@@ -16,25 +18,26 @@ MdiChild::MdiChild()
     beg = 0;
     end = 0;
     lastWordPos=0;
-    connect(&thread, &CheckSpellingThread::finishedComputing,
-            this, &MdiChild::updateText,Qt::QueuedConnection);
+
     connect(this, &MdiChild::spacePressed, this, &MdiChild::checkSpellingOfTheWord,Qt::QueuedConnection);
-    //connect(this,&MdiChild::selectedWord,this,&MdiChild::checkSpellingOfTheWord);
 
 }
-void MdiChild::updateText(QString correction,int beg_,int end_){
+void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
+    if(word==correction){
+    QTextCursor cursor = textCursor();
     std::cout<<"beg: "<<beg_<<" end: "<<end_<<std::endl;
     QTextCharFormat underlineFormat;
     underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
-    QTextCursor cursor = textCursor();
+
     cursor.setPosition(beg_);
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, end_ - beg_);
     cursor.mergeCharFormat(underlineFormat);
     setTextCursor(cursor);
     underlineFormat.setUnderlineColor(QTextCharFormat::NoUnderline);
-    QTextCursor cursor_ = textCursor();  // get the cursor
-    cursor_.movePosition(QTextCursor::End);  // move the cursor to the end of the document
-    setTextCursor(cursor_);  // set the cursor position
+    QTextCursor cursor_ = textCursor();
+    cursor_.movePosition(QTextCursor::End);
+    setTextCursor(cursor_);
+    }
 
     update();
 }
@@ -194,7 +197,7 @@ std::string MdiChild::checkSpellingOfTheWord(){
 
 
     Word w(lastWordStr);
-    CheckSpellingThread *workerThread = new CheckSpellingThread(w,beg,end);
+    CheckSpellingThread *workerThread = new CheckSpellingThread(vecOfCorrectWords,w,beg,end);
     beg = end+1;
     connect(workerThread, &CheckSpellingThread::finishedComputing, this, &MdiChild::updateText);
     connect(workerThread, &CheckSpellingThread::finished, workerThread, &QObject::deleteLater);
@@ -213,15 +216,22 @@ std::string MdiChild::checkSpellingOfTheWord(){
     // }
     return "";
 }
+void MdiChild::SelectedWord(QString& str){
+
+
+}
+void MdiChild::correctMistakes(){
+
+
+}
 void MdiChild::mousePressEvent(QMouseEvent * event)
 {
-    QTextCursor tc = cursorForPosition ( event->pos());
-    tc.select(QTextCursor::LineUnderCursor);
-    QString strWord = tc.selectedText();
+    if (Qt::RightButton == event->button()) {
+        QTextCursor textCursor = cursorForPosition(event->pos());
+        textCursor.select(QTextCursor::WordUnderCursor);
+        setTextCursor(textCursor);
+        QString word = textCursor.selectedText();
 
-    if(!strWord.isEmpty())
-    {
-
-        // emit selectedWord(strWord);
+        std::cout<<word.toStdString()<<std::endl;
     }
 }

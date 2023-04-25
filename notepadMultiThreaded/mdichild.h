@@ -20,9 +20,10 @@ public:
     QString currentFile() { return curFile; }
     void mousePressEvent(QMouseEvent * event) override;
     void enterEvent(QMouseEvent *event);
+    void SelectedWord(QString&);
+    void correctMistakes();
 signals:
     void spacePressed();
-    void selectedWord(QString&);
     void hoveredWord();
 
 protected:
@@ -34,7 +35,8 @@ private slots:
     void updateText(QString,int,int);
 
 private:
-    CheckSpellingThread thread;
+    std::vector<std::string> vecOfCorrectWords;
+    QString correctText;
     bool maybeSave();
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
