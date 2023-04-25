@@ -1,4 +1,3 @@
-
 #ifndef MDICHILD_H
 #define MDICHILD_H
 #include "checkspellingthread.h"
@@ -32,7 +31,7 @@ protected:
 private slots:
     void documentWasModified();
     std::string checkSpellingOfTheWord();
-    void updateText(QString);
+    void updateText(QString,int,int);
 
 private:
     CheckSpellingThread thread;
@@ -42,7 +41,8 @@ private:
     void keyPressEvent(QKeyEvent *event) override;
     QString curFile;
     bool isUntitled;
-
+    int beg;
+    int end;
 };
 
 #endif // MDICHILD_H

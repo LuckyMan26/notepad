@@ -1,4 +1,3 @@
-
 #include "word.h"
 #include <ctime>
 #include <set>
@@ -65,7 +64,6 @@ public:
     explicit WordThread(std::set<std::string>& candidates_,std::string w):
         word(w), candidates(candidates_){
     }
-
     void run() override {
         Word w;
         std::set<std::string> editFirstOrderSet = w.editFirstOrder(word);
@@ -78,7 +76,6 @@ public:
     }
 signals:
     void resultReady(const std::set<std::string>& candidates);
-
 };*/
 extern std::set<std::string> possibleCandidatsOfFirstOrder(std::string w){
     Word word;
@@ -161,7 +158,6 @@ std::string Word::spellTest(){
             maxProbability = temp;
         }
     }
-    std::cout<<std::clock() - clock << std::endl;
-    std::cout<<maxProbability<<std::endl;
+
     return res;
 }

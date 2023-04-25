@@ -1,4 +1,3 @@
-
 #include <QtWidgets>
 #include <iostream>
 #include "QtConcurrent/qtconcurrentrun.h"
@@ -14,17 +13,29 @@ MdiChild::MdiChild()
     this->setFontFamily("Consolas");
     setAcceptDrops(false);
     curPos=0;
+    beg = 0;
+    end = 0;
     lastWordPos=0;
     connect(&thread, &CheckSpellingThread::finishedComputing,
-            this, &MdiChild::updateText);
-    connect(this, &MdiChild::spacePressed, this, &MdiChild::checkSpellingOfTheWord);
+            this, &MdiChild::updateText,Qt::QueuedConnection);
+    connect(this, &MdiChild::spacePressed, this, &MdiChild::checkSpellingOfTheWord,Qt::QueuedConnection);
     //connect(this,&MdiChild::selectedWord,this,&MdiChild::checkSpellingOfTheWord);
 
 }
-void MdiChild::updateText(QString correction){
+void MdiChild::updateText(QString correction,int beg_,int end_){
+    std::cout<<"beg: "<<beg_<<" end: "<<end_<<std::endl;
+    QTextCharFormat underlineFormat;
+    underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+    QTextCursor cursor = textCursor();
+    cursor.setPosition(beg_);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, end_ - beg_);
+    cursor.mergeCharFormat(underlineFormat);
+    setTextCursor(cursor);
+    underlineFormat.setUnderlineColor(QTextCharFormat::NoUnderline);
+    QTextCursor cursor_ = textCursor();  // get the cursor
+    cursor_.movePosition(QTextCursor::End);  // move the cursor to the end of the document
+    setTextCursor(cursor_);  // set the cursor position
 
-    //std::cout<<"Result: ";
-    this->setText("afdfads");
     update();
 }
 void MdiChild::keyPressEvent(QKeyEvent *event) {
@@ -168,35 +179,38 @@ QString MdiChild::strippedName(const QString &fullFileName)
 }
 std::string MdiChild::checkSpellingOfTheWord(){
 
-    std::cout<<"got here"<<std::endl;
+
     QString text = this->toPlainText();
 
     int index = text.size()-1;
-    QString lastWord = text.mid((lastWordPos>0 ? lastWordPos+1:0),index-lastWordPos);
+    int lastIndex = text.lastIndexOf(' ');
+    end = lastIndex;
+    QString lastWord = text.mid(beg,end-beg+1);
     QTextCharFormat underlineFormat;
     std::string correction;
     std::string lastWordStr = lastWord.toLower().toStdString();
     lastWordStr.erase(remove(lastWordStr.begin(), lastWordStr.end(), ' '), lastWordStr.end());
+
+
+
     Word w(lastWordStr);
-    thread.setWord(w);
-    thread.checkSpell();
+    CheckSpellingThread *workerThread = new CheckSpellingThread(w,beg,end);
+    beg = end+1;
+    connect(workerThread, &CheckSpellingThread::finishedComputing, this, &MdiChild::updateText);
+    connect(workerThread, &CheckSpellingThread::finished, workerThread, &QObject::deleteLater);
+    workerThread->start();
+
     //else{
     /*underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
-
     QTextCursor cursor = textCursor();
-
     cursor.setPosition((lastWordPos>0 ? lastWordPos+1:0));
-
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, index - (lastWordPos>0 ? lastWordPos+1:0));
-
     cursor.mergeCharFormat(underlineFormat);
-
     setTextCursor(cursor);
-
     lastWordPos = index;*/
 
     //return lastWord.toStdString();
-   // }
+    // }
     return "";
 }
 void MdiChild::mousePressEvent(QMouseEvent * event)
@@ -208,7 +222,6 @@ void MdiChild::mousePressEvent(QMouseEvent * event)
     if(!strWord.isEmpty())
     {
 
-       // emit selectedWord(strWord);
+        // emit selectedWord(strWord);
     }
 }
-

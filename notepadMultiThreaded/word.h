@@ -1,4 +1,3 @@
-
 #ifndef WORD_H
 #define WORD_H
 
@@ -28,5 +27,4 @@ public slots:
     void handleResults(std::set<std::string>& s);
 
 };
-
 #endif // WORD_H
