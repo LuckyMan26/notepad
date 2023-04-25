@@ -2,7 +2,7 @@
 #define MDICHILD_H
 #include "checkspellingthread.h"
 #include <QTextEdit>
-
+#include <QMap>
 class MdiChild : public QTextEdit
 {
     Q_OBJECT
@@ -32,10 +32,11 @@ protected:
 private slots:
     void documentWasModified();
     std::string checkSpellingOfTheWord();
-    void updateText(QString,int,int);
+    void updateText(QString,QString,int,int);
 
 private:
     std::vector<std::string> vecOfCorrectWords;
+    std::map<std::string, std::string> map;
     QString correctText;
     bool maybeSave();
     void setCurrentFile(const QString &fileName);

@@ -5,7 +5,7 @@
 #include "dictionary.h"
 #include "word.h"
 #include <QToolTip>
-
+#include <algorithm>
 MdiChild::MdiChild()
 {
     setMouseTracking(true);
@@ -23,7 +23,7 @@ MdiChild::MdiChild()
 
 }
 void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
-    if(word==correction){
+    if(word!=correction){
     QTextCursor cursor = textCursor();
     std::cout<<"beg: "<<beg_<<" end: "<<end_<<std::endl;
     QTextCharFormat underlineFormat;
@@ -37,6 +37,7 @@ void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
     QTextCursor cursor_ = textCursor();
     cursor_.movePosition(QTextCursor::End);
     setTextCursor(cursor_);
+     map[word.toStdString()]=correction.toStdString();
     }
 
     update();
@@ -231,7 +232,13 @@ void MdiChild::mousePressEvent(QMouseEvent * event)
         textCursor.select(QTextCursor::WordUnderCursor);
         setTextCursor(textCursor);
         QString word = textCursor.selectedText();
-
-        std::cout<<word.toStdString()<<std::endl;
+        QString text = toPlainText();
+        std::string textStd = text.toStdString();
+        int beg = text.toStdString().find(word.toStdString());
+        std::string correction;
+        if(map.contains(word.toStdString()))
+            textStd = textStd.replace(beg,word.length(),map[word.toStdString()]);
+        setText(QString::fromStdString(textStd));
     }
+    QTextEdit::mousePressEvent(event);
 }

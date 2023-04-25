@@ -12,7 +12,14 @@
 Word::Word(std::string str)
 {
     word=str;
-
+    if(word[word.length()-1]==':' || word[word.length()-1]=='-' || word[word.length()-1]=='+' || word[word.length()-1]==','){
+        std::cout<<"Suits\n";
+        nextSymbol = word[word.length()-1];
+        word.pop_back();
+    }
+    else{
+    nextSymbol=char(0);
+    }
 }
 
 std::set<std::string> Word::editFirstOrder(std::string word_){
@@ -144,6 +151,7 @@ std::set<std::string> Word::possibleCandidates(std::string w){
     return res;
 }
 std::string Word::spellTest(){
+    std::cout<<"Word: "<<word<<std::endl;
     candidates = possibleCandidates(word);
     std::clock_t clock = std::clock();
     auto oneMove = *(candidates.begin());

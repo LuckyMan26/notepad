@@ -15,6 +15,7 @@ class Word
     std::set<std::string> candidates;
 
 public:
+    char nextSymbol;
     std::set<std::string> editFirstOrder(std::string word);
     std::set<std::string> editSecondOrder(std::string w);
     Word(std::string str="");
