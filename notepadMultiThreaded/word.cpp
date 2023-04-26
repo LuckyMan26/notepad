@@ -9,6 +9,8 @@
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 #include <algorithm>
+
+
 Word::Word(std::string str)
 {
     word=str;
@@ -20,6 +22,7 @@ Word::Word(std::string str)
     else{
     nextSymbol=char(0);
     }
+     word.erase(remove(word.begin(), word.end(), ' '), word.end());
 }
 
 std::set<std::string> Word::editFirstOrder(std::string word_){
@@ -84,24 +87,24 @@ public:
 signals:
     void resultReady(const std::set<std::string>& candidates);
 };*/
-extern std::set<std::string> possibleCandidatsOfFirstOrder(std::string w){
+extern std::set<Candidate> possibleCandidatsOfFirstOrder(std::string w){
     Word word;
-    std::set<std::string> candidates;
-    std::set<std::string> editSecondOrderSet = word.editSecondOrder(w);
+    std::set<Candidate> candidates;
+    std::set<std::string> editSecondOrderSet = word.editFirstOrder(w);
     for(auto it : editSecondOrderSet){
         if(word.checkWordInDictionary(it)){
-            candidates.insert(it);
+            candidates.insert(Candidate{it,1});
         }
     }
     return candidates;
 }
-extern std::set<std::string> possibleCandidatsOfSecondOrder(std::string w){
+extern std::set<Candidate> possibleCandidatsOfSecondOrder(std::string w){
     Word word;
-    std::set<std::string> candidates;
+    std::set<Candidate> candidates;
     std::set<std::string> editFirstOrderSet = word.editFirstOrder(w);
     for(auto it : editFirstOrderSet){
         if(word.checkWordInDictionary(it)){
-            candidates.insert(it);
+              candidates.insert(Candidate{it,0.5});
         }
     }
     return candidates;
@@ -115,16 +118,16 @@ void Word::setWord(std::string str){
 std::string Word::getWord(){
     return word;
 }
-double Word::errorModel(std::string w){
+double Word::errorModel(Candidate w){
     double alpha=0.95;
 
     std::clock_t clock = std::clock();
 
-    if(word==w){
+    if(word==w.word){
         return alpha;
     }
-    else if(checkWordInDictionary(w)){
-        return double(1-alpha)/double((candidates.size()));
+    else if(checkWordInDictionary(w.word)){
+        return double(w.coef*(1-alpha))/double((candidates.size()));
     }
     else{
         return 0;
@@ -133,19 +136,19 @@ double Word::errorModel(std::string w){
 void Word::handleResults(std::set<std::string>& s){
 
 }
-std::set<std::string> Word::possibleCandidates(std::string w){
-    std::set<std::string> candidates1;
-    std::set<std::string> candidates2;
-    std::set<std::string> res;
+std::set<Candidate> Word::possibleCandidates(std::string w){
+    std::set<Candidate> candidates1;
+    std::set<Candidate> candidates2;
+    std::set<Candidate> res;
 
-    QFuture<std::set<std::string>> future1 = QtConcurrent::run(possibleCandidatsOfFirstOrder, w);
-    QFuture<std::set<std::string>> future2 = QtConcurrent::run(possibleCandidatsOfSecondOrder, w);
+    QFuture<std::set<Candidate>> future1 = QtConcurrent::run(possibleCandidatsOfFirstOrder, w);
+    QFuture<std::set<Candidate>> future2 = QtConcurrent::run(possibleCandidatsOfSecondOrder, w);
 
     candidates1 = future1.result();
     candidates2 = future2.result();
     std::merge(candidates1.begin(), candidates1.end(), candidates2.begin(), candidates2.end(), std::inserter(res, res.begin()));
     if(checkWordInDictionary(w)){
-        res.insert(w);
+        res.insert(Candidate{w,2});
     }
 
     return res;
@@ -155,17 +158,18 @@ std::string Word::spellTest(){
     candidates = possibleCandidates(word);
     std::clock_t clock = std::clock();
     auto oneMove = *(candidates.begin());
-    std::string res = oneMove;
-    double maxProbability = (Dictionary::GetInstance()->getProbability(res)) * (errorModel(res));
+    Candidate res = oneMove;
+    double maxProbability = (Dictionary::GetInstance()->getProbability(res.word)) * (errorModel(res));
+
     clock = std::clock();
     for(auto it:candidates){
-
-        double temp =  (Dictionary::GetInstance()->getProbability(it)) * errorModel(it);
+         std::cout<<"Check all words: "<< it.word<<std::endl;
+        double temp =  (Dictionary::GetInstance()->getProbability(it.word)) * errorModel(it);
         if(temp > maxProbability){
             res = it;
             maxProbability = temp;
         }
     }
-
-    return res;
+    std::cout<<res.word<<std::endl;
+    return res.word;
 }

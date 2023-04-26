@@ -231,13 +231,10 @@ void MainWindow::updateMenus()
     nextAct->setEnabled(hasMdiChild);
     previousAct->setEnabled(hasMdiChild);
     windowMenuSeparatorAct->setVisible(hasMdiChild);
-
-#ifndef QT_NO_CLIPBOARD
     bool hasSelection = (activeMdiChild() &&
                          activeMdiChild()->textCursor().hasSelection());
     cutAct->setEnabled(hasSelection);
     copyAct->setEnabled(hasSelection);
-#endif
 }
 
 void MainWindow::updateWindowMenu()
@@ -362,7 +359,6 @@ void MainWindow::createActions()
     exitAct->setStatusTip(tr("Exit the application"));
     fileMenu->addAction(exitAct);
 
-#ifndef QT_NO_CLIPBOARD
     QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
     //QToolBar *editToolBar = addToolBar(tr("Edit"));
 
@@ -410,7 +406,6 @@ void MainWindow::createActions()
     connect(pasteAct, &QAction::triggered, this, &MainWindow::paste);
     editMenu->addAction(pasteAct);
     //fileToolBar->addAction(pasteAct);
-#endif
 
     windowMenu = menuBar()->addMenu(tr("&Window"));
     connect(windowMenu, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);

@@ -23,7 +23,9 @@ MdiChild::MdiChild()
 
 }
 void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
-    if(word!=correction){
+    QString word_ = word.toLower();
+    QString correction_ = correction.toLower();
+    if(word_!=correction_){
     QTextCursor cursor = textCursor();
     std::cout<<"beg: "<<beg_<<" end: "<<end_<<std::endl;
     QTextCharFormat underlineFormat;
@@ -37,7 +39,7 @@ void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
     QTextCursor cursor_ = textCursor();
     cursor_.movePosition(QTextCursor::End);
     setTextCursor(cursor_);
-     map[word.toStdString()]=correction.toStdString();
+    map[word_.toStdString()]=correction_.toStdString();
     }
 
     update();
@@ -185,7 +187,7 @@ std::string MdiChild::checkSpellingOfTheWord(){
 
 
     QString text = this->toPlainText();
-
+    std::string textStd = text.toStdString();
     int index = text.size()-1;
     int lastIndex = text.lastIndexOf(' ');
     end = lastIndex;
@@ -236,6 +238,7 @@ void MdiChild::mousePressEvent(QMouseEvent * event)
         std::string textStd = text.toStdString();
         int beg = text.toStdString().find(word.toStdString());
         std::string correction;
+        word = word.toLower();
         if(map.contains(word.toStdString()))
             textStd = textStd.replace(beg,word.length(),map[word.toStdString()]);
         setText(QString::fromStdString(textStd));
