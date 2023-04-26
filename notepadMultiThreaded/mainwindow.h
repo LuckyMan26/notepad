@@ -40,19 +40,19 @@ private slots:
     void saveAs();
     void updateRecentFileActions();
     void openRecentFile();
+    void fixErrorsSlot();
 
-#ifndef QT_NO_CLIPBOARD
+
     void cut();
     void copy();
     void paste();
     void undo();
     void redo();
-#endif
 
     void updateMenus();
     void updateWindowMenu();
     MdiChild *createMdiChild();
-    //void switchLayoutDirection();
+
 
 private:
     enum { MaxRecentFiles = 5 };
@@ -71,19 +71,20 @@ private:
     QMdiArea *mdiArea;
 
     QMenu *windowMenu;
+    QAction* fixErrors;
     QAction *newAct;
     QAction *saveAct;
     QAction *saveAsAct;
     QAction *recentFileActs[MaxRecentFiles];
     QAction *recentFileSeparator;
     QAction *recentFileSubMenuAct;
-#ifndef QT_NO_CLIPBOARD
+
     QAction *cutAct;
     QAction *copyAct;
     QAction *pasteAct;
     QAction *undoAct;
     QAction *redoAct;
-#endif
+
     QAction *closeAct;
     QAction *closeAllAct;
     QAction *tileAct;

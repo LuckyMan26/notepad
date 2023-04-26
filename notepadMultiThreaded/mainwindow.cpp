@@ -12,6 +12,7 @@
 MainWindow::MainWindow()
     : mdiArea(new QMdiArea)
 {
+    setAttribute( Qt::WA_AlwaysShowToolTips);
     mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setCentralWidget(mdiArea);
@@ -52,6 +53,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::newFile()
 {
     MdiChild *child = createMdiChild();
+
     child->newFile();
     child->show();
 }
@@ -229,13 +231,10 @@ void MainWindow::updateMenus()
     nextAct->setEnabled(hasMdiChild);
     previousAct->setEnabled(hasMdiChild);
     windowMenuSeparatorAct->setVisible(hasMdiChild);
-
-#ifndef QT_NO_CLIPBOARD
     bool hasSelection = (activeMdiChild() &&
                          activeMdiChild()->textCursor().hasSelection());
     cutAct->setEnabled(hasSelection);
     copyAct->setEnabled(hasSelection);
-#endif
 }
 
 void MainWindow::updateWindowMenu()
@@ -283,14 +282,28 @@ MdiChild *MainWindow::createMdiChild()
 
     return child;
 }
+void MainWindow::fixErrorsSlot(){
+    QList<QMdiSubWindow *> windows = mdiArea->subWindowList();
+    for(int i=0;i<windows.size();i++){
+         MdiChild *child = qobject_cast<MdiChild *>(windows[i]->widget());
+         child->correctMistakes();
+    }
 
+}
 void MainWindow::createActions()
 {
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     QToolBar *fileToolBar = addToolBar(tr("File"));
     fileToolBar->setMovable(false);
+    const QIcon FixIcon = QIcon::fromTheme("correct-errors", QIcon(":/images/correct-errors.svg"));
 
+    fixErrors = new QAction(FixIcon,tr("correct errors"),this);
+    fixErrors->setStatusTip(tr("Correct Errors"));
+    fileMenu->addAction(fixErrors);
+    fileToolBar->addAction(fixErrors);
+    connect(fixErrors, &QAction::triggered, this, &MainWindow::fixErrorsSlot);
     const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/images/document-new.svg"));
+
     newAct = new QAction(newIcon, tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new file"));
@@ -346,7 +359,6 @@ void MainWindow::createActions()
     exitAct->setStatusTip(tr("Exit the application"));
     fileMenu->addAction(exitAct);
 
-#ifndef QT_NO_CLIPBOARD
     QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
     //QToolBar *editToolBar = addToolBar(tr("Edit"));
 
@@ -394,7 +406,6 @@ void MainWindow::createActions()
     connect(pasteAct, &QAction::triggered, this, &MainWindow::paste);
     editMenu->addAction(pasteAct);
     //fileToolBar->addAction(pasteAct);
-#endif
 
     windowMenu = menuBar()->addMenu(tr("&Window"));
     connect(windowMenu, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
