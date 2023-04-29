@@ -25,31 +25,37 @@ MdiChild::MdiChild()
 void MdiChild::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu menu(this);
+
+
     QTextCursor textCursor = cursorForPosition(event->pos());
     textCursor.select(QTextCursor::WordUnderCursor);
     setTextCursor(textCursor);
+    int temp = textCursor.selectionEnd();
+
     QString word = textCursor.selectedText();
+    int beg = temp - word.length();
     std::string wordStd = word.toStdString();
     QString text = toPlainText();
     std::string textStd = text.toStdString();
-    int beg = text.toStdString().find(word.toStdString());
+
     std::string correction;
     word = word.toLower();
     std::string correctSpelling = map[word.toStdString()];
     QAction* actionCorrectWord = new QAction(QString::fromStdString(correctSpelling),this);
     menu.addAction(actionCorrectWord);
-    connect(actionCorrectWord,&QAction::triggered,this,[this,&correctSpelling,&wordStd]{ CorrectWord(correctSpelling,wordStd); });
+    connect(actionCorrectWord,&QAction::triggered,this,[this,&correctSpelling,&wordStd,&beg]{ CorrectWord(correctSpelling,wordStd,beg); });
     menu.popup(viewport()->mapToGlobal(pos()));
     menu.exec(event->globalPos());
 
 }
-void MdiChild::CorrectWord(std::string correctSpelling,std::string wrongSpelling){
+void MdiChild::CorrectWord(std::string correctSpelling,std::string wrongSpelling,int beg){
+
     QString text = toPlainText();
     std::string textStd = text.toStdString();
 
     textStd = textStd.replace(beg,wrongSpelling.length(),correctSpelling);
     setText(QString::fromStdString(textStd));
-    update();
+
 }
 void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
     QString word_ = word.toLower();
@@ -249,7 +255,6 @@ std::string MdiChild::checkSpellingOfTheWord(){
     return "";
 }
 void MdiChild::SelectedWord(QString& str){
-
 
 }
 void MdiChild::correctMistakes(){
