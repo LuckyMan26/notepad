@@ -22,6 +22,35 @@ MdiChild::MdiChild()
     connect(this, &MdiChild::spacePressed, this, &MdiChild::checkSpellingOfTheWord,Qt::QueuedConnection);
 
 }
+void MdiChild::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu menu(this);
+    QTextCursor textCursor = cursorForPosition(event->pos());
+    textCursor.select(QTextCursor::WordUnderCursor);
+    setTextCursor(textCursor);
+    QString word = textCursor.selectedText();
+    std::string wordStd = word.toStdString();
+    QString text = toPlainText();
+    std::string textStd = text.toStdString();
+    int beg = text.toStdString().find(word.toStdString());
+    std::string correction;
+    word = word.toLower();
+    std::string correctSpelling = map[word.toStdString()];
+    QAction* actionCorrectWord = new QAction(QString::fromStdString(correctSpelling),this);
+    menu.addAction(actionCorrectWord);
+    connect(actionCorrectWord,&QAction::triggered,this,[this,&correctSpelling,&wordStd]{ CorrectWord(correctSpelling,wordStd); });
+    menu.popup(viewport()->mapToGlobal(pos()));
+    menu.exec(event->globalPos());
+
+}
+void MdiChild::CorrectWord(std::string correctSpelling,std::string wrongSpelling){
+    QString text = toPlainText();
+    std::string textStd = text.toStdString();
+
+    textStd = textStd.replace(beg,wrongSpelling.length(),correctSpelling);
+    setText(QString::fromStdString(textStd));
+    update();
+}
 void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
     QString word_ = word.toLower();
     QString correction_ = correction.toLower();
@@ -229,7 +258,7 @@ void MdiChild::correctMistakes(){
 }
 void MdiChild::mousePressEvent(QMouseEvent * event)
 {
-    if (Qt::RightButton == event->button()) {
+    /*if (Qt::RightButton == event->button()) {
         QTextCursor textCursor = cursorForPosition(event->pos());
         textCursor.select(QTextCursor::WordUnderCursor);
         setTextCursor(textCursor);
@@ -242,6 +271,6 @@ void MdiChild::mousePressEvent(QMouseEvent * event)
         if(map.contains(word.toStdString()))
             textStd = textStd.replace(beg,word.length(),map[word.toStdString()]);
         setText(QString::fromStdString(textStd));
-    }
+    }*/
     QTextEdit::mousePressEvent(event);
 }

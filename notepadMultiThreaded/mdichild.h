@@ -28,12 +28,12 @@ signals:
 
 protected:
     void closeEvent(QCloseEvent *event) override;
-
+    void contextMenuEvent(QContextMenuEvent *event) override;
 private slots:
     void documentWasModified();
     std::string checkSpellingOfTheWord();
     void updateText(QString,QString,int,int);
-
+    void CorrectWord(std::string,std::string);
 private:
     std::vector<std::string> vecOfCorrectWords;
     std::map<std::string, std::string> map;
