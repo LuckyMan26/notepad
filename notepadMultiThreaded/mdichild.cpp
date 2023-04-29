@@ -52,7 +52,14 @@ void MdiChild::CorrectWord(std::string correctSpelling,std::string wrongSpelling
 
     QString text = toPlainText();
     std::string textStd = text.toStdString();
+    QTextCursor cursor = textCursor();
+    QTextCharFormat underlineFormat;
+    underlineFormat.setUnderlineStyle(QTextCharFormat::NoUnderline);
 
+    cursor.setPosition(beg);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, wrongSpelling.length());
+    cursor.mergeCharFormat(underlineFormat);
+    setTextCursor(cursor);
     textStd = textStd.replace(beg,wrongSpelling.length(),correctSpelling);
     setText(QString::fromStdString(textStd));
 
@@ -62,7 +69,6 @@ void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
     QString correction_ = correction.toLower();
     if(word_!=correction_){
     QTextCursor cursor = textCursor();
-    std::cout<<"beg: "<<beg_<<" end: "<<end_<<std::endl;
     QTextCharFormat underlineFormat;
     underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
 
@@ -263,19 +269,6 @@ void MdiChild::correctMistakes(){
 }
 void MdiChild::mousePressEvent(QMouseEvent * event)
 {
-    /*if (Qt::RightButton == event->button()) {
-        QTextCursor textCursor = cursorForPosition(event->pos());
-        textCursor.select(QTextCursor::WordUnderCursor);
-        setTextCursor(textCursor);
-        QString word = textCursor.selectedText();
-        QString text = toPlainText();
-        std::string textStd = text.toStdString();
-        int beg = text.toStdString().find(word.toStdString());
-        std::string correction;
-        word = word.toLower();
-        if(map.contains(word.toStdString()))
-            textStd = textStd.replace(beg,word.length(),map[word.toStdString()]);
-        setText(QString::fromStdString(textStd));
-    }*/
+
     QTextEdit::mousePressEvent(event);
 }
