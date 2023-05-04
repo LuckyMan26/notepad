@@ -8,6 +8,7 @@ class MdiChild : public QTextEdit
     Q_OBJECT
     int curPos;
     int lastWordPos;
+    std::string prevText;
 public:
     MdiChild();
 

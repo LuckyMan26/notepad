@@ -154,7 +154,6 @@ std::set<Candidate> Word::possibleCandidates(std::string w){
     return res;
 }
 std::string Word::spellTest(){
-    std::cout<<"Word: "<<word<<std::endl;
     candidates = possibleCandidates(word);
     std::clock_t clock = std::clock();
     auto oneMove = *(candidates.begin());
@@ -163,7 +162,6 @@ std::string Word::spellTest(){
 
     clock = std::clock();
     for(auto it:candidates){
-         std::cout<<"Check all words: "<< it.word<<std::endl;
         double temp =  (Dictionary::GetInstance()->getProbability(it.word)) * errorModel(it);
         if(temp > maxProbability){
             res = it;

@@ -6,6 +6,8 @@
 #include "word.h"
 #include <QToolTip>
 #include <algorithm>
+#include <QTextFragment>
+
 MdiChild::MdiChild()
 {
     setMouseTracking(true);
@@ -18,13 +20,13 @@ MdiChild::MdiChild()
     beg = 0;
     end = 0;
     lastWordPos=0;
-
+    prevText = "";
     connect(this, &MdiChild::spacePressed, this, &MdiChild::checkSpellingOfTheWord,Qt::QueuedConnection);
 
 }
 void MdiChild::contextMenuEvent(QContextMenuEvent *event)
 {
-    QMenu menu(this);
+
 
 
     QTextCursor textCursor = cursorForPosition(event->pos());
@@ -36,36 +38,55 @@ void MdiChild::contextMenuEvent(QContextMenuEvent *event)
     int beg = temp - word.length();
     std::string wordStd = word.toStdString();
     QString text = toPlainText();
-    std::string textStd = text.toStdString();
+
 
     std::string correction;
     word = word.toLower();
     std::string correctSpelling = map[word.toStdString()];
+    std::cout<<"Correct Spelling: " << word.toStdString()<< " " << correctSpelling << std::endl;
+    if(correctSpelling==""){
+        std::cout<<"pizda\n";
+        QTextEdit::contextMenuEvent(event);
+        return;
+    }
+    else{
+    QMenu* menu = this->createStandardContextMenu();
     QAction* actionCorrectWord = new QAction(QString::fromStdString(correctSpelling),this);
-    menu.addAction(actionCorrectWord);
+    menu->addAction(actionCorrectWord);
     connect(actionCorrectWord,&QAction::triggered,this,[this,&correctSpelling,&wordStd,&beg]{ CorrectWord(correctSpelling,wordStd,beg); });
-    menu.popup(viewport()->mapToGlobal(pos()));
-    menu.exec(event->globalPos());
+    menu->popup(viewport()->mapToGlobal(pos()));
+    menu->exec(event->globalPos());
+    }
+
 
 }
 void MdiChild::CorrectWord(std::string correctSpelling,std::string wrongSpelling,int beg){
 
+
     QString text = toPlainText();
     std::string textStd = text.toStdString();
-    QTextCursor cursor = textCursor();
+
     QTextCharFormat underlineFormat;
     underlineFormat.setUnderlineStyle(QTextCharFormat::NoUnderline);
-
+    QTextCursor cursor = textCursor();
     cursor.setPosition(beg);
+    textCursor().beginEditBlock();
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, wrongSpelling.length());
-    cursor.mergeCharFormat(underlineFormat);
-    setTextCursor(cursor);
-    textStd = textStd.replace(beg,wrongSpelling.length(),correctSpelling);
-    setText(QString::fromStdString(textStd));
+    cursor.removeSelectedText();
 
+
+    QString html = "<span>" + QString::fromStdString(correctSpelling) + "</span>";
+    cursor.insertHtml(html);
+    cursor.setPosition(QTextCursor::End);
+    textCursor().endEditBlock();
+    setTextCursor(cursor);
+
+    //end = textStd.size();
+    //setFocus();
 }
 void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
     QString word_ = word.toLower();
+
     QString correction_ = correction.toLower();
     if(word_!=correction_){
     QTextCursor cursor = textCursor();
@@ -229,6 +250,8 @@ std::string MdiChild::checkSpellingOfTheWord(){
 
     QString text = this->toPlainText();
     std::string textStd = text.toStdString();
+
+
     int index = text.size()-1;
     int lastIndex = text.lastIndexOf(' ');
     end = lastIndex;
@@ -246,7 +269,7 @@ std::string MdiChild::checkSpellingOfTheWord(){
     connect(workerThread, &CheckSpellingThread::finishedComputing, this, &MdiChild::updateText);
     connect(workerThread, &CheckSpellingThread::finished, workerThread, &QObject::deleteLater);
     workerThread->start();
-
+    prevText = text.toStdString();
     //else{
     /*underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
     QTextCursor cursor = textCursor();
