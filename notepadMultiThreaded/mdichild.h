@@ -25,11 +25,13 @@ public:
     void correctMistakes();
 signals:
     void spacePressed();
+    void wordChangedPressed(int,int);
     void hoveredWord();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
+
 private slots:
     void documentWasModified();
     std::string checkSpellingOfTheWord();
@@ -47,6 +49,8 @@ private:
     bool isUntitled;
     int beg;
     int end;
+    std::string lastTrackedWord;
+
 };
 
 #endif // MDICHILD_H

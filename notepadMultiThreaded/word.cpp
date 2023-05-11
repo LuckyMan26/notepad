@@ -168,6 +168,6 @@ std::string Word::spellTest(){
             maxProbability = temp;
         }
     }
-    std::cout<<res.word<<std::endl;
+
     return res.word;
 }
