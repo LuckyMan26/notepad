@@ -90,10 +90,11 @@ signals:
 extern std::set<Candidate> possibleCandidatsOfFirstOrder(std::string w){
     Word word;
     std::set<Candidate> candidates;
-    std::set<std::string> editSecondOrderSet = word.editFirstOrder(w);
-    for(auto it : editSecondOrderSet){
+    std::set<std::string> editFirstOrderSet = word.editFirstOrder(w);
+    for(auto it : editFirstOrderSet){
+
         if(word.checkWordInDictionary(it)){
-            candidates.insert(Candidate{it,1});
+            candidates.insert(Candidate{it,10});
         }
     }
     return candidates;
@@ -101,8 +102,9 @@ extern std::set<Candidate> possibleCandidatsOfFirstOrder(std::string w){
 extern std::set<Candidate> possibleCandidatsOfSecondOrder(std::string w){
     Word word;
     std::set<Candidate> candidates;
-    std::set<std::string> editFirstOrderSet = word.editFirstOrder(w);
-    for(auto it : editFirstOrderSet){
+    std::set<std::string> editSecondOrderSet = word.editSecondOrder(w);
+    for(auto it : editSecondOrderSet){
+
         if(word.checkWordInDictionary(it)){
             candidates.insert(Candidate{it,0.5});
         }
@@ -127,7 +129,7 @@ double Word::errorModel(Candidate w){
         return alpha;
     }
     else if(checkWordInDictionary(w.word)){
-        return double(w.coef*(1-alpha))/double((candidates.size()));
+        return double((w.coef*(1-alpha))/double((candidates.size())));
     }
     else{
         return 0.0;
@@ -153,28 +155,43 @@ std::set<Candidate> Word::possibleCandidates(std::string w){
 
     return res;
 }
-std::string Word::spellTest(){
+std::vector<std::string> Word::spellTest(){
     candidates = possibleCandidates(word);
-
     std::clock_t clock = std::clock();
-    auto oneMove = *(candidates.begin());
+
     if(candidates.empty()){
-        return "";
+        return {};
     }
     else{
-    Candidate res =  Candidate{"",0};
-    res = oneMove;
-    double maxProbability = (Dictionary::GetInstance()->getProbability(res.word)) * (errorModel(res));
+    auto oneMove = *(candidates.begin());
+    std::vector<Candidate> res;
+    res.push_back(oneMove);
+    std::sort(res.begin(),res.end());
+    double maxProbability = (Dictionary::GetInstance()->getProbability(res[0].word)) * (errorModel(res[0]));
 
-    clock = std::clock();
     for(auto it:candidates){
         double temp =  (Dictionary::GetInstance()->getProbability(it.word)) * errorModel(it);
+
         if(temp > maxProbability){
-            res = it;
-            maxProbability = temp;
+
+                if(res.size()<4){
+                    res.push_back(it);                   
+                }
+                else{
+                    res.erase(res.begin());
+                    res.push_back(it);
+
+                }
+                std::sort(res.begin(),res.end(),[this](Candidate a, Candidate b) {
+                    return  (((Dictionary::GetInstance()->getProbability(a.word)) * errorModel(a)) <= ((Dictionary::GetInstance()->getProbability(b.word)) * errorModel(b)));
+                });
+            maxProbability = ((Dictionary::GetInstance()->getProbability(res[0].word)) * errorModel(res[0]));
         }
     }
-    std::cout<<res.word<<std::endl;
-    return res.word;
+    std::vector<std::string> res_;
+    for(int i=0;i<res.size();i++){
+        res_.push_back(res[i].word);
+    }
+    return res_;
     }
 }

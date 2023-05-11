@@ -29,7 +29,7 @@ public:
     std::string getWord();
     bool checkWordInDictionary(std::string w);
     double errorModel(Candidate w);
-    std::string spellTest();
+    std::vector<std::string> spellTest();
 public slots:
     void handleResults(std::set<std::string>& s);
 

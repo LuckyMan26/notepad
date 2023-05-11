@@ -7,6 +7,7 @@
 #include <QToolTip>
 #include <algorithm>
 #include <QTextFragment>
+#include <algorithm>
 std::vector<std::pair<std::string, size_t>> breakTextIntoWords(const std::string& text) {
     std::vector<std::pair<std::string, size_t>> words;
     std::string word;
@@ -71,18 +72,20 @@ void MdiChild::contextMenuEvent(QContextMenuEvent *event)
     QString text = toPlainText();
     std::string correction;
     word = word.toLower();
-    std::string correctSpelling = map[word.toStdString()];
-    if(correctSpelling==""){
+
+    std::vector<std::string> correctSpelling = map[word.toStdString()];
+    if(correctSpelling[0]==""){
 
         QTextEdit::contextMenuEvent(event);
         return;
     }
     else{
     QMenu* menu = this->createStandardContextMenu();
-    QAction* actionCorrectWord = new QAction(QString::fromStdString(correctSpelling),this);
+        for(int i=0;i<correctSpelling.size();i++){
+    QAction* actionCorrectWord = new QAction(QString::fromStdString(correctSpelling[i]),this);
     menu->addAction(actionCorrectWord);
-    menu->insertSeparator(actionCorrectWord);
-    connect(actionCorrectWord,&QAction::triggered,this,[this,&correctSpelling,&wordStd,&beg]{ CorrectWord(correctSpelling,wordStd,beg); });
+    connect(actionCorrectWord,&QAction::triggered,this,[this,&correctSpelling,&wordStd,&beg, &i]{ CorrectWord(correctSpelling[i],wordStd,beg); });
+    }
     menu->popup(viewport()->mapToGlobal(pos()));
     menu->exec(event->globalPos());
     }
@@ -111,11 +114,14 @@ void MdiChild::CorrectWord(std::string correctSpelling,std::string wrongSpelling
 
 
 }
-void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
+void MdiChild::updateText(std::vector<QString> correction,QString word,int beg_,int end_){
     QString word_ = word.toLower();
 
-    QString correction_ = correction.toLower();
-    if(word_!=correction_){
+    std::vector<QString> correction_;
+    for(int i=0;i<correction.size();i++){
+    correction_.push_back(correction[i]);
+    }
+    if(word_!=correction_[0]){
     QTextCursor cursor = textCursor();
     QTextCharFormat underlineFormat;
     underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
@@ -128,7 +134,11 @@ void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
     QTextCursor cursor_ = textCursor();
     cursor_.movePosition(QTextCursor::End);
     setTextCursor(cursor_);
-    map[word_.toStdString()]=correction_.toStdString();
+    std::vector<std::string> result;
+    for(int i=0;i<correction_.size();i++){
+            result.push_back(correction_[i].toStdString());
+    }
+    map[word_.toStdString()]=result;
     }
 
     update();
@@ -302,8 +312,13 @@ std::string MdiChild::checkSpellingOfTheWord(){
                 connect(workerThread, &CheckSpellingThread::finishedComputing, this, &MdiChild::updateText);
             }
             else{
-                updateText(QString::fromStdString(map[it.first]),QString::fromStdString(it.first),it.second,it.second+it.first.length());
+                std::vector<QString> vec;
+                for(auto it_: map[it.first]){
+                    vec.push_back(QString::fromStdString(it_));
+                }
+                updateText(vec,QString::fromStdString(it.first),it.second,it.second+it.first.length());
             }
+
     }
 
     beg = end+1;

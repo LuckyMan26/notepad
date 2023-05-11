@@ -35,11 +35,11 @@ protected:
 private slots:
     void documentWasModified();
     std::string checkSpellingOfTheWord();
-    void updateText(QString,QString,int,int);
+    void updateText(std::vector<QString>,QString,int,int);
     void CorrectWord(std::string,std::string,int);
 private:
     std::vector<std::string> vecOfCorrectWords;
-    std::map<std::string, std::string> map;
+    std::map<std::string, std::vector<std::string>> map;
     QString correctText;
     bool maybeSave();
     void setCurrentFile(const QString &fileName);
@@ -50,7 +50,7 @@ private:
     int beg;
     int end;
     std::string lastTrackedWord;
-
+    std::vector<std::string> wordsOnCheck;
 };
 
 #endif // MDICHILD_H

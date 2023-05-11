@@ -43,18 +43,16 @@ void CheckSpellingThread::RunThread(Word w){
 
 }
 void CheckSpellingThread::run(){
-    try{
-        std::string correction_ = word.spellTest();
 
-        QString res = QString::fromStdString(correction_);
+    std::vector<std::string> correction_ = word.spellTest();
+    std::vector<QString> res;
+    for(int i=0;i<correction_.size();i++){
+        res.push_back(QString::fromStdString(correction_[i]));
+    }
 
-        vecOfWords.push_back(correction_);
+
+        //vecOfWords.push_back(correction_);
         emit finishedComputing(res,QString::fromStdString(word.getWord()),beg,end);
-    }
-    catch(const std::logic_error& ex){
-        std::thread::id threadId = std::this_thread::get_id();
-        std::cerr << "Exception occurred in thread " << threadId << ": " << ex.what() << "Word: " << word.getWord() << std::endl;
-    }
 
     //emit Finished();
 }

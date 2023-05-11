@@ -17,7 +17,7 @@ public:
     void setWord(Word w);
 
 signals:
-    void finishedComputing(QString,QString,int,int);
+    void finishedComputing(std::vector<QString>,QString,int,int);
     void Finished();
 public slots:
     void checkSpell(Word w,int,int);
