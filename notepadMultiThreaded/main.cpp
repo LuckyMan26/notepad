@@ -8,15 +8,15 @@
 int main(int argc, char *argv[])
 {
 
-    //std::string str="teh";
+    std::string str="bueatiful";
 
-    //std::string correction;
-    //Word w(str);
-    //correction = w.spellTest();
-    //std::cout<<correction<<std::endl;
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    return a.exec();
+    std::string correction;
+    Word w(str);
+    correction = w.spellTest();
+    std::cout<<correction<<std::endl;
+    //QApplication a(argc, argv);
+    //MainWindow w;
+    //w.show();
+    //return a.exec();
     return 0;
 }

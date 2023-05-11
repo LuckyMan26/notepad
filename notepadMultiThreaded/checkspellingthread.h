@@ -7,13 +7,12 @@
 #include "qthread.h"
 #include "qwaitcondition.h"
 #include "word.h"
-
-class CheckSpellingThread : public QThread
+#include <QRunnable>
+class CheckSpellingThread : public QObject,public QRunnable
 {
     Q_OBJECT
-
 public:
-    CheckSpellingThread(Word w=Word(""),int beg_=0,int end_=0,QObject *parent = nullptr);
+    CheckSpellingThread(std::vector<std::string>&,Word w=Word(""),int beg_=0,int end_=0);
     ~CheckSpellingThread();
     void setWord(Word w);
 
@@ -29,6 +28,7 @@ protected:
 private:
 
     int beg,end;
+    std::vector<std::string>& vecOfWords;
 
     Word word;
     QMutex mutex;

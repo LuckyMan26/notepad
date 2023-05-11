@@ -20,9 +20,9 @@ Word::Word(std::string str)
         word.pop_back();
     }
     else{
-    nextSymbol=char(0);
+        nextSymbol=char(0);
     }
-     word.erase(remove(word.begin(), word.end(), ' '), word.end());
+    word.erase(remove(word.begin(), word.end(), ' '), word.end());
 }
 
 std::set<std::string> Word::editFirstOrder(std::string word_){
@@ -104,7 +104,7 @@ extern std::set<Candidate> possibleCandidatsOfSecondOrder(std::string w){
     std::set<std::string> editFirstOrderSet = word.editFirstOrder(w);
     for(auto it : editFirstOrderSet){
         if(word.checkWordInDictionary(it)){
-              candidates.insert(Candidate{it,0.5});
+            candidates.insert(Candidate{it,0.5});
         }
     }
     return candidates;
@@ -130,7 +130,7 @@ double Word::errorModel(Candidate w){
         return double(w.coef*(1-alpha))/double((candidates.size()));
     }
     else{
-        return 0;
+        return 0.0;
     }
 }
 void Word::handleResults(std::set<std::string>& s){
@@ -155,9 +155,15 @@ std::set<Candidate> Word::possibleCandidates(std::string w){
 }
 std::string Word::spellTest(){
     candidates = possibleCandidates(word);
+
     std::clock_t clock = std::clock();
     auto oneMove = *(candidates.begin());
-    Candidate res = oneMove;
+    if(candidates.empty()){
+        return "";
+    }
+    else{
+    Candidate res =  Candidate{"",0};
+    res = oneMove;
     double maxProbability = (Dictionary::GetInstance()->getProbability(res.word)) * (errorModel(res));
 
     clock = std::clock();
@@ -168,6 +174,7 @@ std::string Word::spellTest(){
             maxProbability = temp;
         }
     }
-
+    std::cout<<res.word<<std::endl;
     return res.word;
+    }
 }

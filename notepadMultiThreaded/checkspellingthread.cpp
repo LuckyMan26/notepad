@@ -1,9 +1,12 @@
-#include "qdebug.h"
 #include "qmutex.h"
 #include "checkspellingthread.h"
 #include <iostream>
-CheckSpellingThread::CheckSpellingThread(Word w,int beg_,int end_,QObject *parent) :
-    QThread(parent)
+#include <stdexcept>
+#include <thread>
+
+CheckSpellingThread::CheckSpellingThread(std::vector<std::string>& wordVec_,Word w,int beg_,int end_) :
+
+    vecOfWords(wordVec_)
 {
     word = w;
     beg = beg_;
@@ -19,7 +22,7 @@ CheckSpellingThread::~CheckSpellingThread()
     abort = true;
     condition.wakeOne();
     mutex.unlock();
-    wait();
+
 }
 void CheckSpellingThread::checkSpell(Word w,int beg_,int end_){
 
@@ -29,9 +32,7 @@ void CheckSpellingThread::checkSpell(Word w,int beg_,int end_){
     beg = beg_;
     end = end_;
     mutex.unlock();
-    if (!isRunning()) {
-        start(HighPriority);
-    }
+
 
 }
 void CheckSpellingThread::RunThread(Word w){
@@ -42,27 +43,18 @@ void CheckSpellingThread::RunThread(Word w){
 
 }
 void CheckSpellingThread::run(){
+    try{
+        std::string correction_ = word.spellTest();
 
+        QString res = QString::fromStdString(correction_);
 
-    forever{
-
-    mutex.lock();
-    std::string correction_ = word.spellTest();
-    QString res;
-    if(correction_==""){
-        res = QString::fromStdString(word.getWord());
+        vecOfWords.push_back(correction_);
+        emit finishedComputing(res,QString::fromStdString(word.getWord()),beg,end);
     }
-    else
-        res = QString::fromStdString(correction_);
-
-
-    emit finishedComputing(res,QString::fromStdString(word.getWord()),beg,end);
-
-    emit Finished();
-    if(!restart)
-       condition.wait(&mutex);
-    restart = false;
-    mutex.unlock();
+    catch(const std::logic_error& ex){
+        std::thread::id threadId = std::this_thread::get_id();
+        std::cerr << "Exception occurred in thread " << threadId << ": " << ex.what() << "Word: " << word.getWord() << std::endl;
     }
 
+    //emit Finished();
 }

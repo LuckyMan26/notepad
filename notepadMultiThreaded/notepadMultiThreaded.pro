@@ -14,6 +14,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     mdichild.cpp \
+    spellingcheck.cpp \
     word.cpp
 
 HEADERS += \
@@ -21,6 +22,7 @@ HEADERS += \
     dictionary.h \
     mainwindow.h \
     mdichild.h \
+    spellingcheck.h \
     word.h
 
 FORMS += \

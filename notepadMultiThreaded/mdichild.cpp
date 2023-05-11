@@ -7,7 +7,7 @@
 #include <QToolTip>
 #include <algorithm>
 #include <QTextFragment>
-std::vector<std::pair<std::string,size_t>> splitSentenceInWords(const std::string& text){
+std::vector<std::pair<std::string, size_t>> breakTextIntoWords(const std::string& text) {
     std::vector<std::pair<std::string, size_t>> words;
     std::string word;
     size_t wordStartIndex = 0;
@@ -15,25 +15,29 @@ std::vector<std::pair<std::string,size_t>> splitSentenceInWords(const std::strin
     for (size_t i = 0; i < text.length(); ++i) {
         char currentChar = text[i];
 
+        // Check if the current character is a delimiter (space, punctuation, etc.)
         if (std::isspace(currentChar) || std::ispunct(currentChar)) {
             if (!word.empty()) {
                 words.emplace_back(word, wordStartIndex);
                 word.clear();
             }
         } else {
+            // If it's not a delimiter, add the character to the current word
             if (word.empty()) {
-                wordStartIndex = i;
+                wordStartIndex = i;  // Start of a new word
             }
             word += currentChar;
         }
     }
 
+    // Handle the last word if the text doesn't end with a delimiter
     if (!word.empty()) {
         words.emplace_back(word, wordStartIndex);
     }
 
     return words;
 }
+
 MdiChild::MdiChild()
 {
     setMouseTracking(true);
@@ -65,13 +69,11 @@ void MdiChild::contextMenuEvent(QContextMenuEvent *event)
     int beg = temp - word.length();
     std::string wordStd = word.toStdString();
     QString text = toPlainText();
-
-
     std::string correction;
     word = word.toLower();
     std::string correctSpelling = map[word.toStdString()];
-    if(correctSpelling==word.toStdString()){
-        std::cout<<"Hello from here\n";
+    if(correctSpelling==""){
+
         QTextEdit::contextMenuEvent(event);
         return;
     }
@@ -105,7 +107,7 @@ void MdiChild::CorrectWord(std::string correctSpelling,std::string wrongSpelling
     textCursor().endEditBlock();
     setTextCursor(cursor);
     text = toPlainText();
-    prevText = text.toStdString();
+
 
 
 }
@@ -114,7 +116,6 @@ void MdiChild::updateText(QString correction,QString word,int beg_,int end_){
 
     QString correction_ = correction.toLower();
     if(word_!=correction_){
-    std::cout<<"pizda 2\n";
     QTextCursor cursor = textCursor();
     QTextCharFormat underlineFormat;
     underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
@@ -275,6 +276,7 @@ std::string MdiChild::checkSpellingOfTheWord(){
 
 
     QString text = this->toPlainText();
+    text = text.toLower();
     std::string textStd = text.toStdString();
 
 
@@ -287,26 +289,24 @@ std::string MdiChild::checkSpellingOfTheWord(){
     std::string lastWordStr = lastWord.toLower().toStdString();
     lastWordStr.erase(remove(lastWordStr.begin(), lastWordStr.end(), ' '), lastWordStr.end());
 
-    std::vector<std::pair<std::string,size_t>> wordsOfText = splitSentenceInWords(textStd);
-
+    std::vector<std::pair<std::string,size_t>> wordsOfText = breakTextIntoWords(textStd);
+    int counter=0;
         for(auto it : wordsOfText){
+
             if(!map.contains(it.first)){
-                std::cout<<"pizda\n";
                 Word w(it.first);
-                std::cout<<"pizda\n";
+
                 CheckSpellingThread *workerThread = new CheckSpellingThread(vecOfCorrectWords,w,it.second,it.second+it.first.length());
-                std::cout<<it.first <<" "<< it.second<< " " << it.second+it.first.length()<<std::endl;
+
+                QThreadPool::globalInstance()->start(workerThread);
                 connect(workerThread, &CheckSpellingThread::finishedComputing, this, &MdiChild::updateText);
-                connect(workerThread, &CheckSpellingThread::finished, workerThread, &QObject::deleteLater);
-                workerThread->start();
-                std::cout<<it.first <<" "<< it.second<< " " << it.second+it.first.length()<<std::endl;
             }
             else{
                 updateText(QString::fromStdString(map[it.first]),QString::fromStdString(it.first),it.second,it.second+it.first.length());
             }
     }
 
-
+    beg = end+1;
     return "";
 }
 void MdiChild::SelectedWord(QString& str){

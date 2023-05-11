@@ -16,7 +16,6 @@ struct Candidate{
 class Word
 {
 
-
     std::string word;
     std::set<Candidate> possibleCandidates(std::string w);
     std::set<Candidate> candidates;
