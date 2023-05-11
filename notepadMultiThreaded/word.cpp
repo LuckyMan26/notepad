@@ -9,7 +9,7 @@
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 #include <algorithm>
-
+#include <cctype>
 
 Word::Word(std::string str)
 {
@@ -23,6 +23,16 @@ Word::Word(std::string str)
         nextSymbol=char(0);
     }
     word.erase(remove(word.begin(), word.end(), ' '), word.end());
+    std::cout<<word[0]<<std::endl;
+    if(word[0]>='A' && word[0]<='Z'){
+        isFirstLetterCapital = true;
+    }
+    else{
+        isFirstLetterCapital = false;
+    }
+    for(char& c : word){
+        c = std::tolower(c);
+    }
 }
 
 std::set<std::string> Word::editFirstOrder(std::string word_){
@@ -190,7 +200,14 @@ std::vector<std::string> Word::spellTest(){
     }
     std::vector<std::string> res_;
     for(int i=0;i<res.size();i++){
-        res_.push_back(res[i].word);
+        if(isFirstLetterCapital){
+
+            res[i].word[0] = std::toupper(res[i].word[0]);
+            res_.push_back(res[i].word);
+        }
+        else{
+            res_.push_back(res[i].word);
+        }
     }
     return res_;
     }

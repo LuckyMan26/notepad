@@ -19,7 +19,7 @@ class Word
     std::string word;
     std::set<Candidate> possibleCandidates(std::string w);
     std::set<Candidate> candidates;
-
+    bool isFirstLetterCapital;
 public:
     char nextSymbol;
     std::set<std::string> editFirstOrder(std::string word);

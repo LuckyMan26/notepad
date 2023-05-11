@@ -38,7 +38,14 @@ std::vector<std::pair<std::string, size_t>> breakTextIntoWords(const std::string
 
     return words;
 }
-
+std::string toLower(std::string str){
+    std::string res;
+    for (char c : str) {
+        c = std::tolower(c);
+        res+=c;
+    }
+    return res;
+}
 MdiChild::MdiChild()
 {
     setMouseTracking(true);
@@ -58,9 +65,6 @@ MdiChild::MdiChild()
 
 void MdiChild::contextMenuEvent(QContextMenuEvent *event)
 {
-
-
-
     QTextCursor textCursor = cursorForPosition(event->pos());
     textCursor.select(QTextCursor::WordUnderCursor);
     setTextCursor(textCursor);
@@ -68,26 +72,30 @@ void MdiChild::contextMenuEvent(QContextMenuEvent *event)
 
     QString word = textCursor.selectedText();
     int beg = temp - word.length();
+    if(word==""){
+        QTextEdit::contextMenuEvent(event);
+        return;
+    }
     std::string wordStd = word.toStdString();
     QString text = toPlainText();
     std::string correction;
     word = word.toLower();
-
     std::vector<std::string> correctSpelling = map[word.toStdString()];
-    if(correctSpelling[0]==""){
-
+    if(correctSpelling[correctSpelling.size()-1]==""){
         QTextEdit::contextMenuEvent(event);
         return;
     }
     else{
     QMenu* menu = this->createStandardContextMenu();
-        for(int i=0;i<correctSpelling.size();i++){
+    for(int i=0;i<correctSpelling.size();i++){
     QAction* actionCorrectWord = new QAction(QString::fromStdString(correctSpelling[i]),this);
     menu->addAction(actionCorrectWord);
-    connect(actionCorrectWord,&QAction::triggered,this,[this,&correctSpelling,&wordStd,&beg, &i]{ CorrectWord(correctSpelling[i],wordStd,beg); });
+    connect(actionCorrectWord,&QAction::triggered,this,[=](){ CorrectWord(correctSpelling[i],wordStd,beg); });
+
     }
     menu->popup(viewport()->mapToGlobal(pos()));
     menu->exec(event->globalPos());
+    return;
     }
 
 
@@ -104,13 +112,14 @@ void MdiChild::CorrectWord(std::string correctSpelling,std::string wrongSpelling
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, wrongSpelling.length());
     cursor.removeSelectedText();
 
-    QString html = "<span>" + QString::fromStdString(correctSpelling) + "</span>";
+    QString html = "<span style=\"font-size: 14px; font-family: Consolas;\">" + QString::fromStdString(correctSpelling) + "</span>";
     cursor.insertHtml(html);
     cursor.setPosition(QTextCursor::End);
     textCursor().endEditBlock();
     setTextCursor(cursor);
     text = toPlainText();
 
+    update();
 
 
 }
@@ -121,9 +130,10 @@ void MdiChild::updateText(std::vector<QString> correction,QString word,int beg_,
     for(int i=0;i<correction.size();i++){
     correction_.push_back(correction[i]);
     }
-    if(word_!=correction_[0]){
+    if(word_!=correction_[correction_.size()-1]){
     QTextCursor cursor = textCursor();
     QTextCharFormat underlineFormat;
+
     underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
 
     cursor.setPosition(beg_);
@@ -286,7 +296,7 @@ std::string MdiChild::checkSpellingOfTheWord(){
 
 
     QString text = this->toPlainText();
-    text = text.toLower();
+    //text = text.toLower();
     std::string textStd = text.toStdString();
 
 
@@ -303,24 +313,24 @@ std::string MdiChild::checkSpellingOfTheWord(){
     int counter=0;
         for(auto it : wordsOfText){
 
-            if(!map.contains(it.first)){
+        if(!map.contains(toLower(it.first))){
                 Word w(it.first);
 
                 CheckSpellingThread *workerThread = new CheckSpellingThread(vecOfCorrectWords,w,it.second,it.second+it.first.length());
 
                 QThreadPool::globalInstance()->start(workerThread);
+
                 connect(workerThread, &CheckSpellingThread::finishedComputing, this, &MdiChild::updateText);
             }
             else{
                 std::vector<QString> vec;
-                for(auto it_: map[it.first]){
+                for(auto it_: map[toLower(it.first)]){
                     vec.push_back(QString::fromStdString(it_));
                 }
-                updateText(vec,QString::fromStdString(it.first),it.second,it.second+it.first.length());
+                updateText(vec,QString::fromStdString(toLower(it.first)),it.second,it.second+it.first.length());
             }
 
     }
-
     beg = end+1;
     return "";
 }
