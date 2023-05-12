@@ -14,8 +14,7 @@
 Word::Word(std::string str)
 {
     word=str;
-    if(word[word.length()-1]==':' || word[word.length()-1]=='-' || word[word.length()-1]=='+' || word[word.length()-1]==','){
-        std::cout<<"Suits\n";
+    if(word[word.length()-1]==':' || word[word.length()-1]=='-' || word[word.length()-1]=='+' || word[word.length()-1]==',' ||  word[word.length()-1]=='!' || word[word.length()-1]=='.'){
         nextSymbol = word[word.length()-1];
         word.pop_back();
     }
@@ -23,7 +22,6 @@ Word::Word(std::string str)
         nextSymbol=char(0);
     }
     word.erase(remove(word.begin(), word.end(), ' '), word.end());
-    std::cout<<word[0]<<std::endl;
     if(word[0]>='A' && word[0]<='Z'){
         isFirstLetterCapital = true;
     }
@@ -160,6 +158,7 @@ std::set<Candidate> Word::possibleCandidates(std::string w){
     candidates2 = future2.result();
     std::merge(candidates1.begin(), candidates1.end(), candidates2.begin(), candidates2.end(), std::inserter(res, res.begin()));
     if(checkWordInDictionary(w)){
+        std::cout<<"checked \n";
         res.insert(Candidate{w,2});
     }
 

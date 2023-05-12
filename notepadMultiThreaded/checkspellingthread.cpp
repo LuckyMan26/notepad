@@ -43,16 +43,16 @@ void CheckSpellingThread::RunThread(Word w){
 
 }
 void CheckSpellingThread::run(){
-
     std::vector<std::string> correction_ = word.spellTest();
     std::vector<QString> res;
+
     for(int i=0;i<correction_.size();i++){
         res.push_back(QString::fromStdString(correction_[i]));
     }
 
-
         //vecOfWords.push_back(correction_);
         emit finishedComputing(res,QString::fromStdString(word.getWord()),beg,end);
+
 
     //emit Finished();
 }

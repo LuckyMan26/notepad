@@ -8,11 +8,12 @@
 int main(int argc, char *argv[])
 {
 
-    /*std::string str="teh";
+    /*std::string str="sfdgfdsgsdfgsdfgrefwerfsxdfasdfsfgsfdgfd";
 
     std::vector<std::string> correction;
     Word w(str);
     correction = w.spellTest();
+    std::cout<<correction.size()<<std::endl;
     for(auto it : correction){
         std::cout<<it<<std::endl;
     }*/

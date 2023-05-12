@@ -81,7 +81,7 @@ void MdiChild::contextMenuEvent(QContextMenuEvent *event)
     std::string correction;
     word = word.toLower();
     std::vector<std::string> correctSpelling = map[word.toStdString()];
-    if(correctSpelling[correctSpelling.size()-1]==""){
+    if(correctSpelling.empty() || toLower(correctSpelling[correctSpelling.size()-1])==toLower(word.toStdString())){
         QTextEdit::contextMenuEvent(event);
         return;
     }
@@ -130,7 +130,10 @@ void MdiChild::updateText(std::vector<QString> correction,QString word,int beg_,
     for(int i=0;i<correction.size();i++){
     correction_.push_back(correction[i]);
     }
-    if(word_!=correction_[correction_.size()-1]){
+    if(correction_.empty()){
+    return;
+    }
+    if(word_.toLower()!=correction_[correction_.size()-1].toLower()){
     QTextCursor cursor = textCursor();
     QTextCharFormat underlineFormat;
 
@@ -312,7 +315,10 @@ std::string MdiChild::checkSpellingOfTheWord(){
     std::vector<std::pair<std::string,size_t>> wordsOfText = breakTextIntoWords(textStd);
     int counter=0;
         for(auto it : wordsOfText){
-
+        if(std::find(wordsOnCheck.begin(), wordsOnCheck.end(), it.first)!=wordsOnCheck.end()){
+            return "a";
+        }
+        wordsOnCheck.push_back(it.first);
         if(!map.contains(toLower(it.first))){
                 Word w(it.first);
 
@@ -321,6 +327,8 @@ std::string MdiChild::checkSpellingOfTheWord(){
                 QThreadPool::globalInstance()->start(workerThread);
 
                 connect(workerThread, &CheckSpellingThread::finishedComputing, this, &MdiChild::updateText);
+                auto i = std::find(wordsOnCheck.begin(), wordsOnCheck.end(), it.first);
+                wordsOnCheck.erase(i);
             }
             else{
                 std::vector<QString> vec;
@@ -328,6 +336,8 @@ std::string MdiChild::checkSpellingOfTheWord(){
                     vec.push_back(QString::fromStdString(it_));
                 }
                 updateText(vec,QString::fromStdString(toLower(it.first)),it.second,it.second+it.first.length());
+                auto i = std::find(wordsOnCheck.begin(), wordsOnCheck.end(), it.first);
+                wordsOnCheck.erase(i);
             }
 
     }
