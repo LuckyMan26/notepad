@@ -158,7 +158,6 @@ std::set<Candidate> Word::possibleCandidates(std::string w){
     candidates2 = future2.result();
     std::merge(candidates1.begin(), candidates1.end(), candidates2.begin(), candidates2.end(), std::inserter(res, res.begin()));
     if(checkWordInDictionary(w)){
-        std::cout<<"checked \n";
         res.insert(Candidate{w,2});
     }
 

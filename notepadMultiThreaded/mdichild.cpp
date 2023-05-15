@@ -131,6 +131,19 @@ void MdiChild::updateText(std::vector<QString> correction,QString word,int beg_,
     correction_.push_back(correction[i]);
     }
     if(correction_.empty()){
+    QTextCursor cursor = textCursor();
+    QTextCharFormat underlineFormat;
+
+    underlineFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+
+    cursor.setPosition(beg_);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, end_ - beg_);
+    cursor.mergeCharFormat(underlineFormat);
+    setTextCursor(cursor);
+    underlineFormat.setUnderlineColor(QTextCharFormat::NoUnderline);
+    QTextCursor cursor_ = textCursor();
+    cursor_.movePosition(QTextCursor::End);
+    setTextCursor(cursor_);
     return;
     }
     if(word_.toLower()!=correction_[correction_.size()-1].toLower()){
@@ -315,9 +328,8 @@ std::string MdiChild::checkSpellingOfTheWord(){
     std::vector<std::pair<std::string,size_t>> wordsOfText = breakTextIntoWords(textStd);
     int counter=0;
         for(auto it : wordsOfText){
-        if(std::find(wordsOnCheck.begin(), wordsOnCheck.end(), it.first)!=wordsOnCheck.end()){
-            return "a";
-        }
+        if(std::find(wordsOnCheck.begin(), wordsOnCheck.end(), it.first)==wordsOnCheck.end()){
+            //std::cout<<it.first<<std::endl;
         wordsOnCheck.push_back(it.first);
         if(!map.contains(toLower(it.first))){
                 Word w(it.first);
@@ -340,6 +352,7 @@ std::string MdiChild::checkSpellingOfTheWord(){
                 wordsOnCheck.erase(i);
             }
 
+        }
     }
     beg = end+1;
     return "";
