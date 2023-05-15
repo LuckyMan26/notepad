@@ -7,16 +7,19 @@
 
 int main(int argc, char *argv[])
 {
+    /*int n = 100;
+    std::clock_t clock = std::clock();
+    for(int i=0;i<n;i++){
+    std::string str="teh";
 
-    //std::string str="teh";
+    std::vector<std::string> correction;
+    Word w(str);
+    correction = w.spellTest();
+    }*/
 
-    //std::string correction;
-    //Word w(str);
-    //correction = w.spellTest();
-    //std::cout<<correction<<std::endl;
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
     return a.exec();
-    return 0;
+
 }

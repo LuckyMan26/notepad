@@ -9,20 +9,28 @@
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 #include <algorithm>
-
+#include <cctype>
 
 Word::Word(std::string str)
 {
     word=str;
-    if(word[word.length()-1]==':' || word[word.length()-1]=='-' || word[word.length()-1]=='+' || word[word.length()-1]==','){
-        std::cout<<"Suits\n";
+    if(word[word.length()-1]==':' || word[word.length()-1]=='-' || word[word.length()-1]=='+' || word[word.length()-1]==',' ||  word[word.length()-1]=='!' || word[word.length()-1]=='.'){
         nextSymbol = word[word.length()-1];
         word.pop_back();
     }
     else{
-    nextSymbol=char(0);
+        nextSymbol=char(0);
     }
-     word.erase(remove(word.begin(), word.end(), ' '), word.end());
+    word.erase(remove(word.begin(), word.end(), ' '), word.end());
+    if(word[0]>='A' && word[0]<='Z'){
+        isFirstLetterCapital = true;
+    }
+    else{
+        isFirstLetterCapital = false;
+    }
+    for(char& c : word){
+        c = std::tolower(c);
+    }
 }
 
 std::set<std::string> Word::editFirstOrder(std::string word_){
@@ -90,10 +98,11 @@ signals:
 extern std::set<Candidate> possibleCandidatsOfFirstOrder(std::string w){
     Word word;
     std::set<Candidate> candidates;
-    std::set<std::string> editSecondOrderSet = word.editFirstOrder(w);
-    for(auto it : editSecondOrderSet){
+    std::set<std::string> editFirstOrderSet = word.editFirstOrder(w);
+    for(auto it : editFirstOrderSet){
+
         if(word.checkWordInDictionary(it)){
-            candidates.insert(Candidate{it,1});
+            candidates.insert(Candidate{it,10});
         }
     }
     return candidates;
@@ -101,10 +110,11 @@ extern std::set<Candidate> possibleCandidatsOfFirstOrder(std::string w){
 extern std::set<Candidate> possibleCandidatsOfSecondOrder(std::string w){
     Word word;
     std::set<Candidate> candidates;
-    std::set<std::string> editFirstOrderSet = word.editFirstOrder(w);
-    for(auto it : editFirstOrderSet){
+    std::set<std::string> editSecondOrderSet = word.editSecondOrder(w);
+    for(auto it : editSecondOrderSet){
+
         if(word.checkWordInDictionary(it)){
-              candidates.insert(Candidate{it,0.5});
+            candidates.insert(Candidate{it,0.5});
         }
     }
     return candidates;
@@ -127,10 +137,10 @@ double Word::errorModel(Candidate w){
         return alpha;
     }
     else if(checkWordInDictionary(w.word)){
-        return double(w.coef*(1-alpha))/double((candidates.size()));
+        return double((w.coef*(1-alpha))/double((candidates.size())));
     }
     else{
-        return 0;
+        return 0.0;
     }
 }
 void Word::handleResults(std::set<std::string>& s){
@@ -153,23 +163,50 @@ std::set<Candidate> Word::possibleCandidates(std::string w){
 
     return res;
 }
-std::string Word::spellTest(){
-    std::cout<<"Word: "<<word<<std::endl;
+std::vector<std::string> Word::spellTest(){
     candidates = possibleCandidates(word);
     std::clock_t clock = std::clock();
-    auto oneMove = *(candidates.begin());
-    Candidate res = oneMove;
-    double maxProbability = (Dictionary::GetInstance()->getProbability(res.word)) * (errorModel(res));
 
-    clock = std::clock();
+    if(candidates.empty()){
+        return {};
+    }
+    else{
+    auto oneMove = *(candidates.begin());
+    std::vector<Candidate> res;
+    res.push_back(oneMove);
+    std::sort(res.begin(),res.end());
+    double maxProbability = (Dictionary::GetInstance()->getProbability(res[0].word)) * (errorModel(res[0]));
+
     for(auto it:candidates){
-         std::cout<<"Check all words: "<< it.word<<std::endl;
         double temp =  (Dictionary::GetInstance()->getProbability(it.word)) * errorModel(it);
+
         if(temp > maxProbability){
-            res = it;
-            maxProbability = temp;
+
+                if(res.size()<4){
+                    res.push_back(it);                   
+                }
+                else{
+                    res.erase(res.begin());
+                    res.push_back(it);
+
+                }
+                std::sort(res.begin(),res.end(),[this](Candidate a, Candidate b) {
+                    return  (((Dictionary::GetInstance()->getProbability(a.word)) * errorModel(a)) <= ((Dictionary::GetInstance()->getProbability(b.word)) * errorModel(b)));
+                });
+            maxProbability = ((Dictionary::GetInstance()->getProbability(res[0].word)) * errorModel(res[0]));
         }
     }
-    std::cout<<res.word<<std::endl;
-    return res.word;
+    std::vector<std::string> res_;
+    for(int i=0;i<res.size();i++){
+        if(isFirstLetterCapital){
+
+            res[i].word[0] = std::toupper(res[i].word[0]);
+            res_.push_back(res[i].word);
+        }
+        else{
+            res_.push_back(res[i].word);
+        }
+    }
+    return res_;
+    }
 }

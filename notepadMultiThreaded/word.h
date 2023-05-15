@@ -16,11 +16,10 @@ struct Candidate{
 class Word
 {
 
-
     std::string word;
     std::set<Candidate> possibleCandidates(std::string w);
     std::set<Candidate> candidates;
-
+    bool isFirstLetterCapital;
 public:
     char nextSymbol;
     std::set<std::string> editFirstOrder(std::string word);
@@ -30,7 +29,7 @@ public:
     std::string getWord();
     bool checkWordInDictionary(std::string w);
     double errorModel(Candidate w);
-    std::string spellTest();
+    std::vector<std::string> spellTest();
 public slots:
     void handleResults(std::set<std::string>& s);
 

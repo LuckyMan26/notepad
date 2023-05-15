@@ -27,7 +27,7 @@ Dictionary::Dictionary()
     QFile file("../big_text.txt");
     QTextStream in(&file);
 
-    if(!file.open(QIODevice::ReadOnly)) {
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         std::cout<<"file isn`t opened\n";
         return;
     }
